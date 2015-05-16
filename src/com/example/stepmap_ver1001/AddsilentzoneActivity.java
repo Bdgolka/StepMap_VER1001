@@ -5,7 +5,9 @@ import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.Telephony.Sms.Conversations;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -25,8 +27,11 @@ public class AddsilentzoneActivity extends Activity implements
 
 	// Location Manager
 	private LocationManager locationManager;
-	private TextView etLatitude;
-	private TextView etLongtitude;
+	private EditText etLatitude;
+	private EditText etLongtitude;
+
+	// Class extends AsyncTask to get coordinates in BAckground
+	GetGPS gGPS;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -43,8 +48,8 @@ public class AddsilentzoneActivity extends Activity implements
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0,
 				0, this);
 
-		etLatitude = (TextView) findViewById(R.id.etLatitude);
-		etLongtitude = (TextView) findViewById(R.id.etLongtitude);
+		etLatitude = (EditText) findViewById(R.id.etLatitude);
+		etLongtitude = (EditText) findViewById(R.id.etLongtitude);
 	}
 
 	@Override
@@ -94,11 +99,34 @@ public class AddsilentzoneActivity extends Activity implements
 	@Override
 	public void onLocationChanged(Location location) {
 		if (location != null) {
-			//etLatitude.setText((int) location.getLatitude());
-			//etLongtitude.setText((int) location.getLongitude());
+			gGPS = new GetGPS();
+			gGPS.execute(location);
 
-			Log.d(TAG, "Широта=" + location.getLatitude());
-			Log.d(TAG, "Долгота=" + location.getLongitude());
+			// etLatitude.setText((int) location.getLatitude());
+			// etLongtitude.setText((int) location.getLongitude());
+
+			// Log.d(TAG, "Широта=" + location.getLatitude());
+			// Log.d(TAG, "Долгота=" + location.getLongitude());
+		}
+
+	}
+
+	// Class for getting coordinates in the Background
+	class GetGPS extends AsyncTask<Location, Void, Void> {
+
+		@Override
+		protected Void doInBackground(Location... params) {
+			for (Location location : params) {
+				
+				String lat = Double.toString(location.getLatitude());
+				etLatitude.setText(lat);
+				// etLatitude.setText((int)location.getLatitude());
+				// etLongtitude.setText((int) location.getLongitude());
+
+				Log.d(TAG, "Широта=" + location.getLatitude());
+				Log.d(TAG, "Долгота=" + location.getLongitude());
+			}
+			return null;
 		}
 
 	}
